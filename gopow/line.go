@@ -76,26 +76,6 @@ func NewLineComplex(cells []string) *LineComplex {
 		}
 	}
 
-	// downsampl := 1
-	// // the mean of 10 hz makes up a pixel
-	// samplesFilter := []float64{}
-	// for i := 0; i < len(samples); i = i + downsampl {
-
-	// 	mean := 0.0
-	// 	samps := 0
-
-	// 	for ii := 0; ii < downsampl; ii++ {
-	// 		if len(samples)-1 > i+ii {
-	// 			samps++
-	// 			mean += samples[i+ii]
-	// 		}
-	// 	}
-
-	// 	mean = mean / float64(samps)
-
-	// 	samplesFilter = append(samplesFilter, mean)
-	// }
-
 	return &LineComplex{
 		Time:        &datetime,
 		Hash:        cells[0] + cells[1],

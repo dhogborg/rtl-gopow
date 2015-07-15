@@ -14,7 +14,6 @@ type RunConfig struct {
 	InputFile  string
 	OutputFile string
 	Format     string
-	Downsample int
 }
 
 type GoPow struct {
@@ -28,7 +27,6 @@ func NewGoPow(c *cli.Context) (*GoPow, error) {
 		InputFile:  c.String("input"),
 		OutputFile: c.String("output"),
 		Format:     c.String("format"),
-		Downsample: c.Int("downsample"),
 	}
 
 	if config.InputFile == "" {

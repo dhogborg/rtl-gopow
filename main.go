@@ -66,11 +66,6 @@ func main() {
 			Value: "png",
 			Usage: "Output file format, default png",
 		},
-		cli.IntFlag{
-			Name:  "downsample,d",
-			Value: 10,
-			Usage: "Downsample bandwidth by factor. Use if sampled bandwidth is unmanagable wide. 1 is 1:1, 10 is 1:10 and so on.",
-		},
 		cli.BoolFlag{
 			Name:  "verbose",
 			Usage: "Enable more verbose output",
