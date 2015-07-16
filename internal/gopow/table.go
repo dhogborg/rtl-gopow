@@ -1,15 +1,14 @@
 package gopow
 
 import (
-	"fmt"
 	"image"
 	"image/color"
 	"io/ioutil"
+	"math"
 	"sort"
 	"strings"
 	"time"
 
-	"code.google.com/p/draw2d/draw2d"
 	"code.google.com/p/freetype-go/freetype"
 	log "github.com/Sirupsen/logrus"
 	"github.com/dustin/go-humanize"
@@ -21,11 +20,9 @@ import (
 // font configuration
 var (
 	dpi      float64 = 72
-	fontfile string  = "font/luxisr.ttf"
+	fontfile string  = "resources/fonts/luxisr.ttf"
 	hinting  string  = "none"
-	size     float64 = 24
-	spacing  float64 = 1.5
-	wonb     bool    = true
+	size     float64 = 34
 )
 
 type TableComplex struct {
@@ -83,8 +80,8 @@ func (t *TableComplex) Load(file string) error {
 
 func (t *TableComplex) parseBuffer(filebuffer []byte) []*LineComplex {
 
-	t.Max = float64(-99999999)
-	t.Min = float64(99999999)
+	t.Max = float64(math.MaxFloat64 * -1)
+	t.Min = float64(math.MaxFloat64)
 
 	block := string(filebuffer)
 	lines := strings.Split(block, "\n")
@@ -121,12 +118,8 @@ func (t *TableComplex) parseBuffer(filebuffer []byte) []*LineComplex {
 				t.Max = row.HighSample()
 			}
 
-			if t.HzLow > row.HzLow {
-				t.HzLow = row.HzLow
-			}
-			if t.HzHigh < row.HzHigh {
-				t.HzHigh = row.HzHigh
-			}
+			t.HzLow = row.HzLow
+			t.HzHigh = row.HzHigh
 
 			if row.Time != nil {
 
@@ -213,16 +206,19 @@ func (t *TableComplex) ColorAt(x, y int) color.Color {
 	pow_degrees := pow_normalized * h_per_deg
 	hue := hue_start - pow_degrees
 
-	return colorful.Hsv(hue, 1, 0.8)
+	return colorful.Hsv(hue, 1, 0.90)
 
 }
 
 func (t *TableComplex) AnnotateXScale(img *image.RGBA) error {
 
-	// how many samples?
-	// const samples = 10
+	log.WithFields(log.Fields{
+		"hzLow":  t.HzLow,
+		"hzHigh": t.HzHigh,
+	}).Debug("annotate X scale")
 
-	fontBytes, err := resources.Asset("resources/fonts/luxisr.ttf")
+	// load the font
+	fontBytes, err := resources.Asset(fontfile)
 	if err != nil {
 		return err
 	}
@@ -232,26 +228,70 @@ func (t *TableComplex) AnnotateXScale(img *image.RGBA) error {
 		return err
 	}
 
-	gc := draw2d.NewGraphicContext(img)
+	// Initialize the context.
+	fg := image.White
+	ruler := image.White
 
-	draw2d.RoundRect(gc, 5, 5, 95, 95, 10, 10)
-	gc.FillStroke()
-	gc.SetFontSize(18)
-	gc.MoveTo(10, 52)
+	c := freetype.NewContext()
+	c.SetDPI(dpi)
+	c.SetFont(font)
+	c.SetFontSize(size)
 
-	gc.SetFont(font)
-	// gc.SetFontData(draw2d.FontData{"luxi", draw2d.FontFamilyMono, draw2d.FontStyleBold | draw2d.FontStyleItalic})
-	gc.SetFont(font)
+	c.SetClip(img.Bounds())
+	c.SetDst(img)
+	c.SetSrc(fg)
 
-	width := gc.FillString("cou")
-	fmt.Printf("width: %f\n", width)
-	gc.RMoveTo(width+1, 0)
-	gc.FillString("cou")
+	switch hinting {
+	default:
+		c.SetHinting(freetype.NoHinting)
+	case "full":
+		c.SetHinting(freetype.FullHinting)
+	}
+
+	// how many samples?
+	count := int(math.Floor(float64(t.Bins) / float64(500)))
+
+	log.WithFields(log.Fields{
+		"labels": count,
+	}).Debug("annotate X scale")
+
+	hzPerLable := float64(t.HzHigh-t.HzLow) / float64(count)
+	pxPerLable := int(math.Floor(float64(t.Bins) / float64(count)))
+
+	for si := 0; si < count; si++ {
+
+		hz := t.HzLow + (float64(si) * hzPerLable)
+		px := si * pxPerLable
+
+		str := humanize.SI(hz, "Hz")
+
+		// draw a guideline on the exact frequency
+		for i := 0; i < 50; i++ {
+			img.Set(px, i, ruler)
+		}
+
+		// draw the text
+		pt := freetype.Pt(px+10, 30)
+		_, _ = c.DrawString(str, pt)
+
+	}
 
 	return nil
 }
 
 func (t *TableComplex) AnnotateYScale(img *image.RGBA) error {
+
+	log.WithFields(log.Fields{
+		"timestart": t.TimeStart.String(),
+		"timeend":   t.TimeEnd.String(),
+	}).Debug("annotate Y scale")
+
+	// how many samples?
+	const count = 10
+
+	log.WithFields(log.Fields{
+		"labels": count,
+	}).Debug("annotate Y scale")
 
 	return nil
 }

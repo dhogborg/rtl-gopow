@@ -61,10 +61,10 @@ func NewLineComplex(cells []string) *LineComplex {
 		}).Fatal("date parsing failure")
 	}
 
-	hzLow, _ := strconv.ParseFloat(cells[2], 64)
-	hzHigh, _ := strconv.ParseFloat(cells[3], 64)
-	hzStep, _ := strconv.ParseFloat(cells[3], 64)
-	sc, _ := strconv.ParseInt(cells[4], 10, 64)
+	hzLow, _ := strconv.ParseFloat(strings.Trim(cells[2], " "), 64)
+	hzHigh, _ := strconv.ParseFloat(strings.Trim(cells[3], " "), 64)
+	hzStep, _ := strconv.ParseFloat(strings.Trim(cells[3], " "), 64)
+	sc, _ := strconv.ParseInt(strings.Trim(cells[4], " "), 10, 64)
 
 	samples := []float64{}
 	for _, s := range cells[6:] {
