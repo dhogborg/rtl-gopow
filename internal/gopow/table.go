@@ -1,6 +1,7 @@
 package gopow
 
 import (
+	"fmt"
 	"image"
 	"image/color"
 	"io/ioutil"
@@ -8,9 +9,23 @@ import (
 	"strings"
 	"time"
 
+	"code.google.com/p/draw2d/draw2d"
+	"code.google.com/p/freetype-go/freetype"
 	log "github.com/Sirupsen/logrus"
 	"github.com/dustin/go-humanize"
 	"github.com/lucasb-eyer/go-colorful"
+
+	"github.com/dhogborg/rtl-gopow/internal/resources"
+)
+
+// font configuration
+var (
+	dpi      float64 = 72
+	fontfile string  = "font/luxisr.ttf"
+	hinting  string  = "none"
+	size     float64 = 24
+	spacing  float64 = 1.5
+	wonb     bool    = true
 )
 
 type TableComplex struct {
@@ -21,14 +36,14 @@ type TableComplex struct {
 	Min float64 // minimum power value, used for color rendering
 	Max float64 // maximum dito
 
-	FreqStart float64
-	FreqEnd   float64
-
 	Bins         int // horizontal slots, columns, bandwidth
 	Integrations int // vertical slots, rows
 
-	TimeStart time.Time // real time
-	TimeEnd   time.Time
+	HzLow  float64 // X Scale start
+	HzHigh float64 // X Scale end
+
+	TimeStart *time.Time // real time, Y Scale
+	TimeEnd   *time.Time
 }
 
 func NewTable(file string) (*TableComplex, error) {
@@ -102,10 +117,36 @@ func (t *TableComplex) parseBuffer(filebuffer []byte) []*LineComplex {
 			if t.Min > row.LowSample() {
 				t.Min = row.LowSample()
 			}
-
 			if t.Max < row.HighSample() {
 				t.Max = row.HighSample()
 			}
+
+			if t.HzLow > row.HzLow {
+				t.HzLow = row.HzLow
+			}
+			if t.HzHigh < row.HzHigh {
+				t.HzHigh = row.HzHigh
+			}
+
+			if row.Time != nil {
+
+				if t.TimeStart == nil {
+					t.TimeStart = row.Time
+				}
+
+				if t.TimeEnd == nil {
+					t.TimeEnd = row.Time
+				}
+
+				if t.TimeStart.Unix() > row.Time.Unix() {
+					t.TimeStart = row.Time
+				}
+
+				if t.TimeEnd.Unix() < row.Time.Unix() {
+					t.TimeEnd = row.Time
+				}
+			}
+
 		}
 	}
 
@@ -174,4 +215,43 @@ func (t *TableComplex) ColorAt(x, y int) color.Color {
 
 	return colorful.Hsv(hue, 1, 0.8)
 
+}
+
+func (t *TableComplex) AnnotateXScale(img *image.RGBA) error {
+
+	// how many samples?
+	// const samples = 10
+
+	fontBytes, err := resources.Asset("resources/fonts/luxisr.ttf")
+	if err != nil {
+		return err
+	}
+
+	font, err := freetype.ParseFont(fontBytes)
+	if err != nil {
+		return err
+	}
+
+	gc := draw2d.NewGraphicContext(img)
+
+	draw2d.RoundRect(gc, 5, 5, 95, 95, 10, 10)
+	gc.FillStroke()
+	gc.SetFontSize(18)
+	gc.MoveTo(10, 52)
+
+	gc.SetFont(font)
+	// gc.SetFontData(draw2d.FontData{"luxi", draw2d.FontFamilyMono, draw2d.FontStyleBold | draw2d.FontStyleItalic})
+	gc.SetFont(font)
+
+	width := gc.FillString("cou")
+	fmt.Printf("width: %f\n", width)
+	gc.RMoveTo(width+1, 0)
+	gc.FillString("cou")
+
+	return nil
+}
+
+func (t *TableComplex) AnnotateYScale(img *image.RGBA) error {
+
+	return nil
 }

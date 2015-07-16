@@ -1,10 +1,12 @@
 package main
 
 import (
-	"./gopow"
+	"os"
+
 	log "github.com/Sirupsen/logrus"
 	"github.com/codegangsta/cli"
-	"os"
+
+	"github.com/dhogborg/rtl-gopow/internal/gopow"
 )
 
 func main() {

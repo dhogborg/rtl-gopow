@@ -75,6 +75,17 @@ func (g *GoPow) Render() error {
 		}
 	}
 
+	// add some frequency and date annotation
+	err = table.AnnotateXScale(g.image)
+	if err != nil {
+		return err
+	}
+
+	err = table.AnnotateYScale(g.image)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
