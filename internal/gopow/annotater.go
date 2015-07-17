@@ -18,7 +18,8 @@ const (
 	dpi      float64 = 72
 	fontfile string  = "resources/fonts/luxisr.ttf"
 	hinting  string  = "none"
-	size     float64 = 18
+	size     float64 = 15
+	spacing  float64 = 1.1
 )
 
 type Annotator struct {
@@ -82,19 +83,21 @@ func (a *Annotator) init() error {
 func (a *Annotator) DrawXScale() error {
 
 	log.WithFields(log.Fields{
-		"hzLow":  a.table.HzLow,
-		"hzHigh": a.table.HzHigh,
+		"hzHigh": humanize.SI(a.table.HzHigh, "Hz"),
+		"hzLow":  humanize.SI(a.table.HzLow, "Hz"),
 	}).Debug("annotate X scale")
 
 	// how many samples?
 	count := int(math.Floor(float64(a.table.Bins) / float64(350)))
 
-	log.WithFields(log.Fields{
-		"labels": count,
-	}).Debug("annotate X scale")
-
 	hzPerLabel := float64(a.table.HzHigh-a.table.HzLow) / float64(count)
 	pxPerLabel := int(math.Floor(float64(a.table.Bins) / float64(count)))
+
+	log.WithFields(log.Fields{
+		"labels":     count,
+		"hzPerLabel": humanize.SI(hzPerLabel, "Hz"),
+		"pxPerLabel": pxPerLabel,
+	}).Debug("annotate X scale")
 
 	for si := 0; si < count; si++ {
 
@@ -105,12 +108,12 @@ func (a *Annotator) DrawXScale() error {
 		str := fmt.Sprintf("%0.2f %sHz", fract, suffix)
 
 		// draw a guideline on the exact frequency
-		for i := 0; i < 50; i++ {
+		for i := 0; i < 30; i++ {
 			a.image.Set(px, i, image.White)
 		}
 
 		// draw the text
-		pt := freetype.Pt(px+10, 30)
+		pt := freetype.Pt(px+5, 17)
 		_, _ = a.context.DrawString(str, pt)
 
 	}
@@ -169,4 +172,45 @@ func (a *Annotator) DrawYScale() error {
 
 	return nil
 
+}
+
+func (a *Annotator) DrawInfoBox() error {
+
+	tStart, tEnd := a.table.TimeStart, a.table.TimeEnd
+	tDuration := humanize.RelTime(*tStart, *tEnd, "", "")
+	tPixel := (tEnd.Unix() - tStart.Unix()) / int64(a.table.Integrations)
+	tpxRel := humanize.RelTime(*tStart, tStart.Add(time.Duration(tPixel)*time.Second), "", "")
+
+	fStart, fEnd := a.table.HzLow, a.table.HzHigh
+	fBandwidth := fEnd - fStart
+	fPixel := fBandwidth / float64(a.table.Bins)
+
+	perPixel := fmt.Sprintf("%s x %s", a.humanHz(fPixel), tpxRel)
+
+	// positioning
+	imgSize := a.table.Image().Bounds().Size()
+	top, left := imgSize.Y-90, 3
+
+	strings := []string{
+		"Scan start: " + tStart.String(),
+		"Scan end: " + tEnd.String(),
+		"Scan duration: " + tDuration,
+		fmt.Sprintf("Band: %s to %s", a.humanHz(fStart), a.humanHz(fEnd)),
+		fmt.Sprintf("Bandwidth: %s", a.humanHz(fBandwidth)),
+		"1 pixel = " + perPixel,
+	}
+
+	// drawing
+	pt := freetype.Pt(left, top)
+	for _, s := range strings {
+		_, _ = a.context.DrawString(s, pt)
+		pt.Y += a.context.PointToFix32(size * spacing)
+	}
+
+	return nil
+}
+
+func (a *Annotator) humanHz(hz float64) string {
+	fpxSI, fpxSuffix := humanize.ComputeSI(hz)
+	return fmt.Sprintf("%0.2f %sHz", fpxSI, fpxSuffix)
 }

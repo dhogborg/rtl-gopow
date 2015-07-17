@@ -91,7 +91,7 @@ func (g *GoPow) Render() error {
 		// add some frequency and time annotation
 		annotator.DrawXScale()
 		annotator.DrawYScale()
-
+		annotator.DrawInfoBox()
 	}
 
 	return nil
