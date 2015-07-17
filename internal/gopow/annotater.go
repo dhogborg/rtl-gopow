@@ -177,24 +177,23 @@ func (a *Annotator) DrawYScale() error {
 func (a *Annotator) DrawInfoBox() error {
 
 	tStart, tEnd := a.table.TimeStart, a.table.TimeEnd
-	tDuration := humanize.RelTime(*tStart, *tEnd, "", "")
+	// tDuration := humanize.RelTime(*tStart, *tEnd, "", "")
 	tPixel := (tEnd.Unix() - tStart.Unix()) / int64(a.table.Integrations)
-	tpxRel := humanize.RelTime(*tStart, tStart.Add(time.Duration(tPixel)*time.Second), "", "")
 
 	fStart, fEnd := a.table.HzLow, a.table.HzHigh
 	fBandwidth := fEnd - fStart
 	fPixel := fBandwidth / float64(a.table.Bins)
 
-	perPixel := fmt.Sprintf("%s x %s", a.humanHz(fPixel), tpxRel)
+	perPixel := fmt.Sprintf("%s x %d seconds", a.humanHz(fPixel), tPixel)
 
 	// positioning
 	imgSize := a.table.Image().Bounds().Size()
-	top, left := imgSize.Y-90, 3
+	top, left := imgSize.Y-75, 3
 
 	strings := []string{
 		"Scan start: " + tStart.String(),
 		"Scan end: " + tEnd.String(),
-		"Scan duration: " + tDuration,
+		// "Scan duration: " + tDuration,
 		fmt.Sprintf("Band: %s to %s", a.humanHz(fStart), a.humanHz(fEnd)),
 		fmt.Sprintf("Bandwidth: %s", a.humanHz(fBandwidth)),
 		"1 pixel = " + perPixel,
