@@ -1,15 +1,16 @@
 # rtl-gopow
 Render tables from rtl_power to a nice heat map
-Here is an render of rtl_power tool scanning 80-90 MHz during 2.5 hours moving in a car. ![80-90 MHz](http://i.imgur.com/knkzLXO.jpg).
 
 # Availability
-Since Go is easy to cross compile, this tool can be easily distributed as a binary without any dependencies. You'll find it under Releases here on github. The following platforms are avalible as a ready to run binary file:
+Since Go is easy to cross compile, this tool can be easily distributed as a binary without any dependencies. You'll find it under [Releases](https://github.com/dhogborg/rtl-gopow/releases) here on github. The following platforms are avalible as a ready to run binary file:
 
 * OS X (x64)
 * Linux (x64)
 * Linux (arm5)
 * Linux (arm7)
 * Windows (x64)
+
+https://github.com/dhogborg/rtl-gopow/releases
 
 ## Performance
 A render of a 600 MB csv file takes about 2 minutes on a 2,4 GHz Intel Core i5. There is still lots of room for improvement on that though. Memory usage is quite horrid.
@@ -25,4 +26,7 @@ GLOBAL OPTIONS:
    --help, -h       show help
    --version, -v    print the version
 
-   ```
+```
+
+## Demo
+Here is an render of rtl_power tool scanning 80-90 MHz during 2.5 hours moving in a car. ![80-90 MHz](http://i.imgur.com/knkzLXO.jpg).
