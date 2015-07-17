@@ -24,4 +24,5 @@ _testmain.go
 *.prof
 
 /gopow
+/build
 resources.go
