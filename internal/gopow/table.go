@@ -9,20 +9,9 @@ import (
 	"strings"
 	"time"
 
-	"code.google.com/p/freetype-go/freetype"
 	log "github.com/Sirupsen/logrus"
 	"github.com/dustin/go-humanize"
 	"github.com/lucasb-eyer/go-colorful"
-
-	"github.com/dhogborg/rtl-gopow/internal/resources"
-)
-
-// font configuration
-var (
-	dpi      float64 = 72
-	fontfile string  = "resources/fonts/luxisr.ttf"
-	hinting  string  = "none"
-	size     float64 = 34
 )
 
 type TableComplex struct {
@@ -208,90 +197,4 @@ func (t *TableComplex) ColorAt(x, y int) color.Color {
 
 	return colorful.Hsv(hue, 1, 0.90)
 
-}
-
-func (t *TableComplex) AnnotateXScale(img *image.RGBA) error {
-
-	log.WithFields(log.Fields{
-		"hzLow":  t.HzLow,
-		"hzHigh": t.HzHigh,
-	}).Debug("annotate X scale")
-
-	// load the font
-	fontBytes, err := resources.Asset(fontfile)
-	if err != nil {
-		return err
-	}
-
-	font, err := freetype.ParseFont(fontBytes)
-	if err != nil {
-		return err
-	}
-
-	// Initialize the context.
-	fg := image.White
-	ruler := image.White
-
-	c := freetype.NewContext()
-	c.SetDPI(dpi)
-	c.SetFont(font)
-	c.SetFontSize(size)
-
-	c.SetClip(img.Bounds())
-	c.SetDst(img)
-	c.SetSrc(fg)
-
-	switch hinting {
-	default:
-		c.SetHinting(freetype.NoHinting)
-	case "full":
-		c.SetHinting(freetype.FullHinting)
-	}
-
-	// how many samples?
-	count := int(math.Floor(float64(t.Bins) / float64(500)))
-
-	log.WithFields(log.Fields{
-		"labels": count,
-	}).Debug("annotate X scale")
-
-	hzPerLable := float64(t.HzHigh-t.HzLow) / float64(count)
-	pxPerLable := int(math.Floor(float64(t.Bins) / float64(count)))
-
-	for si := 0; si < count; si++ {
-
-		hz := t.HzLow + (float64(si) * hzPerLable)
-		px := si * pxPerLable
-
-		str := humanize.SI(hz, "Hz")
-
-		// draw a guideline on the exact frequency
-		for i := 0; i < 50; i++ {
-			img.Set(px, i, ruler)
-		}
-
-		// draw the text
-		pt := freetype.Pt(px+10, 30)
-		_, _ = c.DrawString(str, pt)
-
-	}
-
-	return nil
-}
-
-func (t *TableComplex) AnnotateYScale(img *image.RGBA) error {
-
-	log.WithFields(log.Fields{
-		"timestart": t.TimeStart.String(),
-		"timeend":   t.TimeEnd.String(),
-	}).Debug("annotate Y scale")
-
-	// how many samples?
-	const count = 10
-
-	log.WithFields(log.Fields{
-		"labels": count,
-	}).Debug("annotate Y scale")
-
-	return nil
 }

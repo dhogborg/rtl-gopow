@@ -5,9 +5,11 @@ import (
 	"image"
 	"image/png"
 	"os"
+	"time"
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/codegangsta/cli"
+	"github.com/dustin/go-humanize"
 )
 
 type RunConfig struct {
@@ -17,8 +19,9 @@ type RunConfig struct {
 }
 
 type GoPow struct {
-	config *RunConfig
-	image  *image.RGBA
+	config    *RunConfig
+	image     *image.RGBA
+	timestamp time.Time
 }
 
 func NewGoPow(c *cli.Context) (*GoPow, error) {
@@ -61,6 +64,7 @@ func NewGoPow(c *cli.Context) (*GoPow, error) {
 func (g *GoPow) Render() error {
 
 	log.Debug("staring render")
+	g.timestamp = time.Now()
 
 	table, err := NewTable(g.config.InputFile)
 	if err != nil {
@@ -75,16 +79,14 @@ func (g *GoPow) Render() error {
 		}
 	}
 
-	// add some frequency and date annotation
-	err = table.AnnotateXScale(g.image)
+	annotator, err := NewAnnotator(g.image, table)
 	if err != nil {
 		return err
 	}
 
-	err = table.AnnotateYScale(g.image)
-	if err != nil {
-		return err
-	}
+	// add some frequency and date annotation
+	annotator.DrawXScale()
+	annotator.DrawYScale()
 
 	return nil
 }
@@ -104,6 +106,9 @@ func (g *GoPow) Write() error {
 	if err != nil {
 		return err
 	}
+
+	duration := humanize.RelTime(g.timestamp, time.Now(), "", "")
+	log.Info("GoPow finished in " + duration)
 
 	return nil
 }
