@@ -1,6 +1,7 @@
 package gopow
 
 import (
+	"bytes"
 	"image"
 	"image/color"
 	"io/ioutil"
@@ -72,14 +73,13 @@ func (t *TableComplex) parseBuffer(filebuffer []byte) []*LineComplex {
 	t.Max = float64(math.MaxFloat64 * -1)
 	t.Min = float64(math.MaxFloat64)
 
-	block := string(filebuffer)
-	lines := strings.Split(block, "\n")
+	lines := bytes.Split(filebuffer, []byte("\n"))
 
 	table := map[string][]*LineComplex{}
 
 	for _, l := range lines {
 
-		cells := strings.Split(l, ",")
+		cells := strings.Split(string(l), ",")
 		line := NewLineComplex(cells)
 
 		if table[line.Hash] == nil {
@@ -176,7 +176,6 @@ func (t *TableComplex) IntegrateLines(lines []*LineComplex) *LineComplex {
 		if i > 0 {
 			masterline.AddSamples(l)
 		}
-
 	}
 
 	return masterline
