@@ -13,9 +13,10 @@ import (
 )
 
 type RunConfig struct {
-	InputFile  string
-	OutputFile string
-	Format     string
+	InputFile   string
+	OutputFile  string
+	Format      string
+	Annotations bool
 }
 
 type GoPow struct {
@@ -27,9 +28,10 @@ type GoPow struct {
 func NewGoPow(c *cli.Context) (*GoPow, error) {
 
 	config := &RunConfig{
-		InputFile:  c.String("input"),
-		OutputFile: c.String("output"),
-		Format:     c.String("format"),
+		InputFile:   c.String("input"),
+		OutputFile:  c.String("output"),
+		Format:      c.String("format"),
+		Annotations: !c.Bool("no-annotations"),
 	}
 
 	if config.InputFile == "" {
@@ -79,14 +81,18 @@ func (g *GoPow) Render() error {
 		}
 	}
 
-	annotator, err := NewAnnotator(g.image, table)
-	if err != nil {
-		return err
-	}
+	if g.config.Annotations {
 
-	// add some frequency and date annotation
-	annotator.DrawXScale()
-	annotator.DrawYScale()
+		annotator, err := NewAnnotator(g.image, table)
+		if err != nil {
+			return err
+		}
+
+		// add some frequency and time annotation
+		annotator.DrawXScale()
+		annotator.DrawYScale()
+
+	}
 
 	return nil
 }
