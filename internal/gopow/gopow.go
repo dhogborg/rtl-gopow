@@ -3,6 +3,7 @@ package gopow
 import (
 	"fmt"
 	"image"
+	"image/jpeg"
 	"image/png"
 	"os"
 	"time"
@@ -108,7 +109,22 @@ func (g *GoPow) Write() error {
 		return err
 	}
 
-	err = png.Encode(out, g.image)
+	switch g.config.Format {
+	case "png":
+		err = png.Encode(out, g.image)
+		break
+
+	case "jpeg", "jpg":
+		opt := &jpeg.Options{
+			Quality: 98,
+		}
+		err = jpeg.Encode(out, g.image, opt)
+		break
+
+	default:
+		return fmt.Errorf("unsupported format: %s", g.config.Format)
+	}
+
 	if err != nil {
 		return err
 	}

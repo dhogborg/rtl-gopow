@@ -66,7 +66,7 @@ func main() {
 		cli.StringFlag{
 			Name:  "format,f",
 			Value: "png",
-			Usage: "Output file format, default png",
+			Usage: "Output file format, default png [png,jpeg]",
 		},
 		cli.BoolFlag{
 			Name:  "verbose",
