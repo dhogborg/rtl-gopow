@@ -1,6 +1,7 @@
 package gopow
 
 import (
+	"fmt"
 	"image"
 	"math"
 	"time"
@@ -86,7 +87,7 @@ func (a *Annotator) DrawXScale() error {
 	}).Debug("annotate X scale")
 
 	// how many samples?
-	count := int(math.Floor(float64(a.table.Bins) / float64(500)))
+	count := int(math.Floor(float64(a.table.Bins) / float64(350)))
 
 	log.WithFields(log.Fields{
 		"labels": count,
@@ -100,7 +101,8 @@ func (a *Annotator) DrawXScale() error {
 		hz := a.table.HzLow + (float64(si) * hzPerLabel)
 		px := si * pxPerLabel
 
-		str := humanize.SI(hz, "Hz")
+		fract, suffix := humanize.ComputeSI(hz)
+		str := fmt.Sprintf("%0.2f %sHz", fract, suffix)
 
 		// draw a guideline on the exact frequency
 		for i := 0; i < 50; i++ {
