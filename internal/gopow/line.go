@@ -1,6 +1,7 @@
 package gopow
 
 import (
+	"math"
 	"strconv"
 	"strings"
 	"time"
@@ -108,9 +109,9 @@ func (l *LineComplex) AddSamples(line *LineComplex) {
 
 func (l *LineComplex) HighSample() float64 {
 
-	high := float64(-99999)
+	high := float64(math.MaxFloat64 * -1)
 	for _, sample := range l.Samples {
-		if sample > high {
+		if sample > high && !math.IsInf(sample, 0) {
 			high = sample
 		}
 	}
@@ -119,9 +120,10 @@ func (l *LineComplex) HighSample() float64 {
 }
 
 func (l *LineComplex) LowSample() float64 {
-	low := float64(99999)
+
+	low := float64(math.MaxFloat64)
 	for _, sample := range l.Samples {
-		if sample < low {
+		if sample < low && !math.IsInf(sample, 0) {
 			low = sample
 		}
 	}
