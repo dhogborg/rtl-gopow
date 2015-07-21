@@ -14,7 +14,7 @@ func main() {
 	app := cli.NewApp()
 	app.Name = "RTL GoPow"
 	app.Usage = "Render a rtl_power CSV output as waterfall image"
-	app.Version = "0.0.1"
+	app.Version = "0.0.2"
 	app.Author = "github.com/dhogborg"
 	app.Email = "d@hogborg.se"
 
