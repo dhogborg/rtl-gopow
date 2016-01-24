@@ -40,6 +40,6 @@ lint:
 	golint .
 
 clean:
-	rm -f build
-	rm -rf internal/resources
+	- rm -r build
+	- rm -rf internal/resources
 

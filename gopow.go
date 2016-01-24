@@ -14,7 +14,7 @@ func main() {
 	app := cli.NewApp()
 	app.Name = "RTL GoPow"
 	app.Usage = "Render a rtl_power CSV output as waterfall image"
-	app.Version = "0.0.2"
+	app.Version = "0.0.3"
 	app.Author = "github.com/dhogborg"
 	app.Email = "d@hogborg.se"
 
@@ -67,6 +67,16 @@ func main() {
 			Name:  "format,f",
 			Value: "png",
 			Usage: "Output file format, default png [png,jpeg]",
+		},
+		cli.Float64Flag{
+			Name:  "max-power",
+			Value: 0,
+			Usage: "Define a manual maximum power (format nn.n)",
+		},
+		cli.Float64Flag{
+			Name:  "min-power",
+			Value: 0,
+			Usage: "Define a manual minimum power (format nn.n)",
 		},
 		cli.BoolFlag{
 			Name:  "verbose",

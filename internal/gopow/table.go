@@ -16,12 +16,10 @@ import (
 )
 
 type TableComplex struct {
-	File string // our input file
+	File   string // our input file
+	Config *RenderConfig
 
 	Rows []*LineComplex
-
-	Min float64 // minimum power value, used for color rendering
-	Max float64 // maximum dito
 
 	Bins         int // horizontal slots, columns, bandwidth
 	Integrations int // vertical slots, rows
@@ -33,11 +31,19 @@ type TableComplex struct {
 	TimeEnd   *time.Time
 }
 
-func NewTable(file string) (*TableComplex, error) {
+// RenderConfig overrides automaticly calculated defaults
+type RenderConfig struct {
+	MinPower *float64 // minimum power value, used for color rendering
+	MaxPower *float64 // maximum dito
+}
+
+func NewTable(file string, conf *RenderConfig) (*TableComplex, error) {
 
 	log.Debug("creating table")
 
-	t := &TableComplex{}
+	t := &TableComplex{
+		Config: conf,
+	}
 
 	err := t.Load(file)
 	if err != nil {
@@ -70,8 +76,8 @@ func (t *TableComplex) Load(file string) error {
 
 func (t *TableComplex) parseBuffer(filebuffer []byte) []*LineComplex {
 
-	t.Max = float64(math.MaxFloat64 * -1)
-	t.Min = float64(math.MaxFloat64)
+	var max = float64(math.MaxFloat64 * -1)
+	var min = float64(math.MaxFloat64)
 
 	lines := bytes.Split(filebuffer, []byte("\n"))
 
@@ -100,11 +106,11 @@ func (t *TableComplex) parseBuffer(filebuffer []byte) []*LineComplex {
 
 			rows = append(rows, row)
 
-			if t.Min > row.LowSample() {
-				t.Min = row.LowSample()
+			if min > row.LowSample() {
+				min = row.LowSample()
 			}
-			if t.Max < row.HighSample() {
-				t.Max = row.HighSample()
+			if max < row.HighSample() {
+				max = row.HighSample()
 			}
 
 			t.HzLow = row.HzLow
@@ -134,9 +140,17 @@ func (t *TableComplex) parseBuffer(filebuffer []byte) []*LineComplex {
 
 	sort.Sort(LineSort(rows))
 
+	if t.Config.MaxPower == nil {
+		t.Config.MaxPower = &max
+	}
+
+	if t.Config.MinPower == nil {
+		t.Config.MinPower = &min
+	}
+
 	log.WithFields(log.Fields{
-		"pMax": t.Max,
-		"pMin": t.Min,
+		"pMax": *t.Config.MaxPower,
+		"pMin": *t.Config.MinPower,
 	}).Debug("integrated lines")
 
 	t.Integrations = len(rows)
@@ -185,14 +199,21 @@ func (t *TableComplex) ColorAt(x, y int) color.Color {
 
 	cell := t.Rows[y].Sample(x)
 
-	hue_start := 236.0
-	hue_end := 0.0
+	hueStart := 236.0
+	hueEnd := 0.0
 
-	span := (t.Min - t.Max) * -1
-	h_per_deg := (hue_start - hue_end) / span
-	pow_normalized := cell - t.Min
-	pow_degrees := pow_normalized * h_per_deg
-	hue := hue_start - pow_degrees
+	span := (*t.Config.MinPower - *t.Config.MaxPower) * -1
+	hPerDeg := (hueStart - hueEnd) / span
+	powNormalized := cell - *t.Config.MinPower
+	powDegrees := powNormalized * hPerDeg
+	hue := hueStart - powDegrees
+
+	if hue > hueStart {
+		hue = hueStart
+	}
+	if hue < hueEnd {
+		hue = hueEnd
+	}
 
 	return colorful.Hsv(hue, 1, 0.90)
 

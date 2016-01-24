@@ -13,11 +13,17 @@ import (
 	"github.com/dustin/go-humanize"
 )
 
+const (
+	PowerConfigAuto = -9813
+)
+
 type RunConfig struct {
 	InputFile   string
 	OutputFile  string
 	Format      string
 	Annotations bool
+	MaxPower    float64
+	MinPower    float64
 }
 
 type GoPow struct {
@@ -33,6 +39,15 @@ func NewGoPow(c *cli.Context) (*GoPow, error) {
 		OutputFile:  c.String("output"),
 		Format:      c.String("format"),
 		Annotations: !c.Bool("no-annotations"),
+		MaxPower:    c.Float64("max-power"),
+		MinPower:    c.Float64("min-power"),
+	}
+
+	if !c.IsSet("max-power") {
+		config.MaxPower = PowerConfigAuto
+	}
+	if !c.IsSet("min-power") {
+		config.MinPower = PowerConfigAuto
 	}
 
 	if config.InputFile == "" {
@@ -66,10 +81,20 @@ func NewGoPow(c *cli.Context) (*GoPow, error) {
 
 func (g *GoPow) Render() error {
 
+	conf := &RenderConfig{}
+
+	if g.config.MaxPower != PowerConfigAuto {
+		conf.MaxPower = &g.config.MaxPower
+	}
+
+	if g.config.MinPower != PowerConfigAuto {
+		conf.MinPower = &g.config.MinPower
+	}
+
 	log.Debug("staring render")
 	g.timestamp = time.Now()
 
-	table, err := NewTable(g.config.InputFile)
+	table, err := NewTable(g.config.InputFile, conf)
 	if err != nil {
 		return err
 	}
@@ -77,7 +102,7 @@ func (g *GoPow) Render() error {
 	g.image = table.Image()
 
 	for y, row := range table.Rows {
-		for x, _ := range row.Samples {
+		for x := range row.Samples {
 			g.image.Set(x, y, table.ColorAt(x, y))
 		}
 	}
