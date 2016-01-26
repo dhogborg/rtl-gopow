@@ -6,9 +6,10 @@ import (
 	"math"
 	"time"
 
-	"code.google.com/p/freetype-go/freetype"
 	log "github.com/Sirupsen/logrus"
 	"github.com/dustin/go-humanize"
+	"github.com/golang/freetype"
+	"golang.org/x/image/font"
 
 	"github.com/dhogborg/rtl-gopow/internal/resources"
 )
@@ -53,7 +54,7 @@ func (a *Annotator) init() error {
 		return err
 	}
 
-	font, err := freetype.ParseFont(fontBytes)
+	luxisr, err := freetype.ParseFont(fontBytes)
 	if err != nil {
 		return err
 	}
@@ -63,7 +64,7 @@ func (a *Annotator) init() error {
 
 	a.context = freetype.NewContext()
 	a.context.SetDPI(dpi)
-	a.context.SetFont(font)
+	a.context.SetFont(luxisr)
 	a.context.SetFontSize(size)
 
 	a.context.SetClip(a.image.Bounds())
@@ -72,9 +73,9 @@ func (a *Annotator) init() error {
 
 	switch hinting {
 	default:
-		a.context.SetHinting(freetype.NoHinting)
+		a.context.SetHinting(font.HintingNone)
 	case "full":
-		a.context.SetHinting(freetype.FullHinting)
+		a.context.SetHinting(font.HintingFull)
 	}
 
 	return nil
@@ -203,7 +204,7 @@ func (a *Annotator) DrawInfoBox() error {
 	pt := freetype.Pt(left, top)
 	for _, s := range strings {
 		_, _ = a.context.DrawString(s, pt)
-		pt.Y += a.context.PointToFix32(size * spacing)
+		pt.Y += a.context.PointToFixed(size * spacing)
 	}
 
 	return nil
