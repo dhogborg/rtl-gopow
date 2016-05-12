@@ -28,11 +28,15 @@ build_arm7: resources
 	GOOS=linux GOARM=7 GOARCH=arm go build -a -o ./build/gopow *.go
 	zip ./build/gopow_linux_arm7.zip ./build/gopow
 
-build_win: resources
+build_win64: resources
 	GOOS=windows GOARCH=amd64 go build -a -o ./build/gopow.exe *.go
 	zip ./build/gopow_win64.zip ./build/gopow.exe
 
-all: build_darwin build_linux build_arm5 build_arm7 build_win
+build_win32: resources
+	GOOS=windows GOARCH=386 go build -a -o ./build/gopow.exe *.go
+	zip ./build/gopow_win32.zip ./build/gopow.exe
+
+all: build_darwin build_linux build_arm5 build_arm7 build_win64 build_win32
 	rm ./build/gopow
 	rm ./build/gopow.exe
 
