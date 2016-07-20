@@ -4,7 +4,7 @@
 VERSION = $(shell git describe --always --dirty)
 TIMESTAMP = $(shell git show -s --format=%ct)
 
-default: build_darwin
+default: build
 
 setup: 
 	go get -u github.com/jteeuwen/go-bindata/...
@@ -12,6 +12,13 @@ setup:
 
 resources:
 	go-bindata -pkg resources -o internal/resources/resources.go resources/...
+
+build: resources
+	godep go build -o ./build/gopow *.go
+
+all: build_darwin build_linux build_arm5 build_arm7 build_win64 build_win32
+	rm ./build/gopow
+	rm ./build/gopow.exe
 
 build_darwin: resources
 	GOOS=darwin GOARCH=amd64 godep go build -a -o ./build/gopow *.go
@@ -37,12 +44,17 @@ build_win32: resources
 	GOOS=windows GOARCH=386 godep go build -a -o ./build/gopow.exe *.go
 	zip ./build/gopow_win32.zip ./build/gopow.exe
 
-all: build_darwin build_linux build_arm5 build_arm7 build_win64 build_win32
-	rm ./build/gopow
-	rm ./build/gopow.exe
-
 lint:
 	golint .
+
+# Save dependencies to vendor folder
+deps:
+	- rm -r vendor Godeps
+	godep save ./...
+
+deps_restore:
+	godep restore ./...
+	- rm -r vendor
 
 clean:
 	- rm -r build
