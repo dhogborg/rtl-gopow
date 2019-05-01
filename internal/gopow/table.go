@@ -199,8 +199,8 @@ func (t *TableComplex) ColorAt(x, y int) color.Color {
 
 	cell := t.Rows[y].Sample(x)
 
-	hueStart := 236.0
-	hueEnd := 0.0
+	hueStart := 0.0
+	hueEnd := 1.0
 
 	span := (*t.Config.MinPower - *t.Config.MaxPower) * -1
 	hPerDeg := (hueStart - hueEnd) / span
@@ -208,13 +208,13 @@ func (t *TableComplex) ColorAt(x, y int) color.Color {
 	powDegrees := powNormalized * hPerDeg
 	hue := hueStart - powDegrees
 
-	if hue > hueStart {
+	if hue < hueStart {
 		hue = hueStart
 	}
-	if hue < hueEnd {
+	if hue > hueEnd {
 		hue = hueEnd
 	}
 
-	return colorful.Hsv(hue, 1, 0.90)
+	return colorful.Color{hue, hue, 0}
 
 }
