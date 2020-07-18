@@ -3,7 +3,6 @@ package gopow
 import (
 	"bytes"
 	"image"
-	"image/color"
 	"io/ioutil"
 	"math"
 	"sort"
@@ -11,7 +10,6 @@ import (
 	"time"
 
 	"github.com/dustin/go-humanize"
-	"github.com/lucasb-eyer/go-colorful"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -38,7 +36,6 @@ type RenderConfig struct {
 }
 
 func NewTable(file string, conf *RenderConfig) (*TableComplex, error) {
-
 	log.Debug("creating table")
 
 	t := &TableComplex{
@@ -54,7 +51,6 @@ func NewTable(file string, conf *RenderConfig) (*TableComplex, error) {
 }
 
 func (t *TableComplex) Load(file string) error {
-
 	log.Debug("loading table")
 
 	t.File = file
@@ -75,7 +71,6 @@ func (t *TableComplex) Load(file string) error {
 }
 
 func (t *TableComplex) parseBuffer(filebuffer []byte) []*LineComplex {
-
 	var max = float64(math.MaxFloat64 * -1)
 	var min = float64(math.MaxFloat64)
 
@@ -84,7 +79,6 @@ func (t *TableComplex) parseBuffer(filebuffer []byte) []*LineComplex {
 	table := map[string][]*LineComplex{}
 
 	for _, l := range lines {
-
 		cells := strings.Split(string(l), ",")
 		line := NewLineComplex(cells)
 
@@ -99,11 +93,8 @@ func (t *TableComplex) parseBuffer(filebuffer []byte) []*LineComplex {
 
 	// loop over hash keys with lines
 	for _, lines := range table {
-
 		row := t.IntegrateLines(lines)
-
 		if row != nil {
-
 			rows = append(rows, row)
 
 			if min > row.LowSample() {
@@ -117,7 +108,6 @@ func (t *TableComplex) parseBuffer(filebuffer []byte) []*LineComplex {
 			t.HzHigh = row.HzHigh
 
 			if row.Time != nil {
-
 				if t.TimeStart == nil {
 					t.TimeStart = row.Time
 				}
@@ -134,7 +124,6 @@ func (t *TableComplex) parseBuffer(filebuffer []byte) []*LineComplex {
 					t.TimeEnd = row.Time
 				}
 			}
-
 		}
 	}
 
@@ -170,7 +159,6 @@ func (t *TableComplex) parseBuffer(filebuffer []byte) []*LineComplex {
 }
 
 func (t *TableComplex) Image() *image.RGBA {
-
 	log.WithFields(log.Fields{
 		"width":  t.Bins,
 		"height": t.Integrations,
@@ -180,7 +168,6 @@ func (t *TableComplex) Image() *image.RGBA {
 }
 
 func (t *TableComplex) IntegrateLines(lines []*LineComplex) *LineComplex {
-
 	if len(lines) == 0 {
 		return nil
 	}
@@ -193,28 +180,4 @@ func (t *TableComplex) IntegrateLines(lines []*LineComplex) *LineComplex {
 	}
 
 	return masterline
-}
-
-func (t *TableComplex) ColorAt(x, y int) color.Color {
-
-	cell := t.Rows[y].Sample(x)
-
-	hueStart := 0.0
-	hueEnd := 1.0
-
-	span := (*t.Config.MinPower - *t.Config.MaxPower) * -1
-	hPerDeg := (hueStart - hueEnd) / span
-	powNormalized := cell - *t.Config.MinPower
-	powDegrees := powNormalized * hPerDeg
-	hue := hueStart - powDegrees
-
-	if hue < hueStart {
-		hue = hueStart
-	}
-	if hue > hueEnd {
-		hue = hueEnd
-	}
-
-	return colorful.Color{hue, hue, 0}
-
 }

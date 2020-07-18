@@ -10,7 +10,6 @@ import (
 )
 
 func main() {
-
 	app := cli.NewApp()
 	app.Name = "RTL GoPow"
 	app.Usage = "Render a rtl_power CSV output as waterfall image"
@@ -19,7 +18,6 @@ func main() {
 	app.Email = "d@hogborg.se"
 
 	app.Action = func(c *cli.Context) {
-
 		if c.Bool("verbose") == true {
 			log.SetLevel(log.DebugLevel)
 		} else {
@@ -49,7 +47,6 @@ func main() {
 			}).Fatal("write failed")
 			return
 		}
-
 	}
 
 	app.Flags = []cli.Flag{
@@ -85,6 +82,11 @@ func main() {
 		cli.BoolFlag{
 			Name:  "no-annotations",
 			Usage: "Disabled annotations such as time and frequency scales",
+		},
+		cli.StringFlag{
+			Name:  "palette",
+			Usage: "Select the palette for output image. [spectrum,yellow]",
+			Value: "spectrum",
 		},
 	}
 

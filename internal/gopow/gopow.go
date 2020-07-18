@@ -24,6 +24,7 @@ type RunConfig struct {
 	Annotations bool
 	MaxPower    float64
 	MinPower    float64
+	Palette     string
 }
 
 type GoPow struct {
@@ -33,7 +34,6 @@ type GoPow struct {
 }
 
 func NewGoPow(c *cli.Context) (*GoPow, error) {
-
 	config := &RunConfig{
 		InputFile:   c.String("input"),
 		OutputFile:  c.String("output"),
@@ -41,6 +41,7 @@ func NewGoPow(c *cli.Context) (*GoPow, error) {
 		Annotations: !c.Bool("no-annotations"),
 		MaxPower:    c.Float64("max-power"),
 		MinPower:    c.Float64("min-power"),
+		Palette:     c.String("palette"),
 	}
 
 	if !c.IsSet("max-power") {
@@ -80,7 +81,6 @@ func NewGoPow(c *cli.Context) (*GoPow, error) {
 }
 
 func (g *GoPow) Render() error {
-
 	conf := &RenderConfig{}
 
 	if g.config.MaxPower != PowerConfigAuto {
@@ -89,6 +89,14 @@ func (g *GoPow) Render() error {
 
 	if g.config.MinPower != PowerConfigAuto {
 		conf.MinPower = &g.config.MinPower
+	}
+
+	var palette Palette
+	switch g.config.Palette {
+	case "yellow":
+		palette = &YellowPalette{}
+	default:
+		palette = &SpectrumPalette{}
 	}
 
 	log.Debug("staring render")
@@ -103,12 +111,11 @@ func (g *GoPow) Render() error {
 
 	for y, row := range table.Rows {
 		for x := range row.Samples {
-			g.image.Set(x, y, table.ColorAt(x, y))
+			g.image.Set(x, y, palette.ColorAt(table, x, y))
 		}
 	}
 
 	if g.config.Annotations {
-
 		annotator, err := NewAnnotator(g.image, table)
 		if err != nil {
 			return err
@@ -124,7 +131,6 @@ func (g *GoPow) Render() error {
 }
 
 func (g *GoPow) Write() error {
-
 	log.WithFields(log.Fields{
 		"file": g.config.OutputFile,
 	}).Debug("staring output write")
