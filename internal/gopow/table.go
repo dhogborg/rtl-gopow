@@ -10,9 +10,9 @@ import (
 	"strings"
 	"time"
 
-	log "github.com/Sirupsen/logrus"
 	"github.com/dustin/go-humanize"
 	"github.com/lucasb-eyer/go-colorful"
+	log "github.com/sirupsen/logrus"
 )
 
 type TableComplex struct {

@@ -6,9 +6,9 @@ import (
 	"math"
 	"time"
 
-	log "github.com/Sirupsen/logrus"
 	"github.com/dustin/go-humanize"
 	"github.com/golang/freetype"
+	log "github.com/sirupsen/logrus"
 	"golang.org/x/image/font"
 
 	"github.com/dhogborg/rtl-gopow/internal/resources"

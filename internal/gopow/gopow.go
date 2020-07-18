@@ -8,9 +8,9 @@ import (
 	"os"
 	"time"
 
-	log "github.com/Sirupsen/logrus"
 	"github.com/codegangsta/cli"
 	"github.com/dustin/go-humanize"
+	log "github.com/sirupsen/logrus"
 )
 
 const (

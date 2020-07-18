@@ -3,8 +3,8 @@ package main
 import (
 	"os"
 
-	log "github.com/Sirupsen/logrus"
 	"github.com/codegangsta/cli"
+	log "github.com/sirupsen/logrus"
 
 	"github.com/dhogborg/rtl-gopow/internal/gopow"
 )
