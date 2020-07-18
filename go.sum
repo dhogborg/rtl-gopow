@@ -8,6 +8,8 @@ github.com/dustin/go-humanize v0.0.0-20151125214831-8929fe90cee4 h1:WX/DKY159S5A
 github.com/dustin/go-humanize v0.0.0-20151125214831-8929fe90cee4/go.mod h1:HtrtbFcZ19U5GC7JDqmcUSB87Iq5E25KnS6fMYU6eOk=
 github.com/golang/freetype v0.0.0-20160410050536-c67e4d98d212 h1:erqso4t6p/N1EjjNntiZUXlhmdTEIDSmM8lzICeaY/c=
 github.com/golang/freetype v0.0.0-20160410050536-c67e4d98d212/go.mod h1:E/TSTwGwJL78qG/PmXZO1EjYhfJinVAhrmmHX6Z8B9k=
+github.com/jteeuwen/go-bindata v3.0.7+incompatible h1:91Uy4d9SYVr1kyTJ15wJsog+esAZZl7JmEfTkwmhJts=
+github.com/jteeuwen/go-bindata v3.0.7+incompatible/go.mod h1:JVvhzYOiGBnFSYRyV00iY8q7/0PThjIYav1p9h5dmKs=
 github.com/konsorten/go-windows-terminal-sequences v1.0.3 h1:CE8S1cTafDpPvMhIxNJKvHsGVBgn1xWYf1NbHQhywc8=
 github.com/konsorten/go-windows-terminal-sequences v1.0.3/go.mod h1:T0+1ngSBFLxvqU3pZ+m/2kptfBszLMUkC4ZK/EgS/cQ=
 github.com/lucasb-eyer/go-colorful v0.0.0-20150907065137-e524a63fc3d3 h1:HKvdgi34B5ivKjlR94L4WMyiC37Kzvmti867/EdbGRk=
