@@ -18,7 +18,7 @@ func main() {
 	app.Email = "d@hogborg.se"
 
 	app.Action = func(c *cli.Context) {
-		if c.Bool("verbose") == true {
+		if c.Bool("verbose") {
 			log.SetLevel(log.DebugLevel)
 		} else {
 			log.SetLevel(log.InfoLevel)
